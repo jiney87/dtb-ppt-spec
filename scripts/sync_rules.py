@@ -60,33 +60,62 @@ def get(path):
         return json.loads(r.read().decode())
 
 
-def get_blob(sha):
-    """Git Blobs API：Contents API 对 >1MB 的文件不返回 content，必须走这里"""
+def get_blob(sha, timeout=180):
+    """Git Blobs API：Contents API 对 >1MB 的文件不返回 content，必须走这里。
+
+    用 Accept: raw 直接拿二进制（5.8MB 而非 base64 后的 7.7MB），并分块读入：
+    本机到 api.github.com 约 20KB/s 且服务端不支持 Range 续传，整块 read() 很容易中途断开。
+    """
     url = f"{API}/repos/{REPO}/git/blobs/{sha}"
     req = urllib.request.Request(url, headers={
-        "Accept": "application/vnd.github+json",
+        "Accept": "application/vnd.github.raw",
         "User-Agent": "dtb-ppt-spec-sync/1.0",
         "X-GitHub-Api-Version": "2022-11-28",
     })
     t = token()
     if t:
         req.add_header("Authorization", f"Bearer {t}")
-    with urllib.request.urlopen(req, timeout=60) as r:
-        d = json.loads(r.read().decode())
-    return base64.b64decode(d["content"])
+    buf = bytearray()
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        while True:
+            chunk = r.read(262144)
+            if not chunk:
+                break
+            buf += chunk
+    return bytes(buf)
 
 
+def fetch_bytes(path, expect_sha=None, attempts=3):
+    """取文件原始 bytes。模板等二进制由这里原样落盘。
+
+    expect_sha 给了就校验；大文件（模板 5.8MB）在慢网络下可能中途断，失败重试。
+    """
+    last = None
+    for i in range(attempts):
+        try:
+            data = get(path)
+            if isinstance(data, list):
+                raise ValueError(f"{path} 是目录，不是文件")
+            if data.get("content") and data.get("encoding", "base64") == "base64":
+                raw = base64.b64decode(data["content"])
+            else:
+                # >1MB：Contents API 返回 content="" / encoding="none"
+                raw = get_blob(data["sha"])
+            if expect_sha and sha(raw) != expect_sha:
+                raise ValueError(f"校验和不符（拿到 {len(raw)}B）")
+            return raw, data.get("sha")
+        except Exception as e:
+            last = e
+            if i + 1 < attempts:
+                print(f"   … {path} 第 {i + 1} 次失败（{type(e).__name__}），重试",
+                      file=sys.stderr)
+                time.sleep(2)
+    raise last
+
+
+# 兼容旧名（--check 只读 manifest，不涉及大文件）
 def fetch_text(path):
-    """取名返回原始 bytes。模板等二进制文件由这里原样落盘。"""
-    data = get(path)
-    if isinstance(data, list):
-        raise ValueError(f"{path} 是目录，不是文件")
-    if data.get("content") and data.get("encoding", "base64") == "base64":
-        raw = base64.b64decode(data["content"])
-    else:
-        # >1MB：Contents API 返回 content="" / encoding="none"
-        raw = get_blob(data["sha"])
-    return raw, data.get("sha")
+    return fetch_bytes(path, attempts=1)
 
 
 def sha(b):
@@ -217,13 +246,14 @@ def cmd_update():
 
     done = []
     for f in need:
+        big = f.get("size", 0) > 1_000_000
+        if big:
+            print(f"   ↓ 下载 {f['path']}（{f['size']/1e6:.1f}MB，网络慢时约需数分钟）",
+                  file=sys.stderr)
         try:
-            blob, _ = fetch_text(f["path"])
+            blob, _ = fetch_bytes(f["path"], expect_sha=f["sha256"])
         except Exception as e:
             print(f"RULE_CHECK=error local={local_v or 'none'} reason=下载 {f['path']} 失败: {e}")
-            return 2
-        if sha(blob) != f["sha256"]:
-            print(f"RULE_CHECK=error reason={f['path']} 校验和不符（仓库内容可能正在发布）")
             return 2
         dst = local_path(f)
         os.makedirs(os.path.dirname(dst), exist_ok=True)
