@@ -4,7 +4,7 @@ spec_version: 1.1.0
 updated_at: 2026-11-01
 applies_to: 全部 PPT 材料输出（默认模板 assets/company-template.pptx）
 source_project: 公司模板.pptx（7 个版式）+ DTB项目专项汇报V1.8.pptx（47 页实测基线）
-template_sha256: 6eec37d748a95993dfcedd79031bb3690a9457e7c0b31ee4a7c5375bafca7a6b
+template_sha256: 73369b887cf190f8c6a140fa6dbe243dcb6f562fd2ca9a06be803b5039f2132f
 ---
 
 # PPT 输出规范（默认模板：公司模板.pptx）v1.1.0
