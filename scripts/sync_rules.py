@@ -60,13 +60,14 @@ def get(path):
         return json.loads(r.read().decode())
 
 
-def get_blob(sha, timeout=180):
-    """Git Blobs API：Contents API 对 >1MB 的文件不返回 content，必须走这里。
+def get_raw(path, timeout=180):
+    """直接用 Accept: raw 取文件裸字节。
 
-    用 Accept: raw 直接拿二进制（5.8MB 而非 base64 后的 7.7MB），并分块读入：
-    本机到 api.github.com 约 20KB/s 且服务端不支持 Range 续传，整块 read() 很容易中途断开。
+    - 比 JSON 的 base64 少 25% 流量（模板 1.5MB vs 2.0MB）
+    - 绕过 Contents API 对 >1MB 文件不返回 content 的限制
+    - 本机到 api.github.com 只有 ~20KB/s 且不支持 Range 续传，故分块读入
     """
-    url = f"{API}/repos/{REPO}/git/blobs/{sha}"
+    url = f"{API}/repos/{REPO}/contents/{path}?ref={REF}"
     req = urllib.request.Request(url, headers={
         "Accept": "application/vnd.github.raw",
         "User-Agent": "dtb-ppt-spec-sync/1.0",
@@ -86,24 +87,20 @@ def get_blob(sha, timeout=180):
 
 
 def fetch_bytes(path, expect_sha=None, attempts=3):
-    """取文件原始 bytes。模板等二进制由这里原样落盘。
+    """取文件原始 bytes：先走 raw，失败再退回 JSON base64；带 sha 校验与重试。
 
-    expect_sha 给了就校验；大文件（模板 5.8MB）在慢网络下可能中途断，失败重试。
+    大文件（模板 1.5MB）在慢网络下会被中途掐断，重试比整轮 update 失败好。
     """
     last = None
     for i in range(attempts):
         try:
-            data = get(path)
-            if isinstance(data, list):
-                raise ValueError(f"{path} 是目录，不是文件")
-            if data.get("content") and data.get("encoding", "base64") == "base64":
-                raw = base64.b64decode(data["content"])
-            else:
-                # >1MB：Contents API 返回 content="" / encoding="none"
-                raw = get_blob(data["sha"])
+            raw = get_raw(path)
+            if raw.lstrip()[:1] == b"{":          # 服务端没按 raw 返回，退化为 JSON
+                d = json.loads(raw.decode())
+                raw = base64.b64decode(d["content"]) if d.get("content") else get_raw(path)
             if expect_sha and sha(raw) != expect_sha:
                 raise ValueError(f"校验和不符（拿到 {len(raw)}B）")
-            return raw, data.get("sha")
+            return raw, None
         except Exception as e:
             last = e
             if i + 1 < attempts:
