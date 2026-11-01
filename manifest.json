@@ -1,9 +1,9 @@
 {
   "spec_id": "dtb-ppt-spec",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "released_at": "2026-11-01",
   "channel": "stable",
-  "notes": "模板瘦身 6.11MB→1.50MB（仅重编码示例图）；下载器加固 raw+分块+重试",
+  "notes": "同步器改走 Contents raw 接口：少25%流量、少一次请求、慢网更稳",
   "files": [
     {
       "path": "skill/SKILL.md",
@@ -18,13 +18,13 @@
     },
     {
       "path": "references/changelog.md",
-      "sha256": "e3db5f6674a04082f20ee043c9a0a8e0897521f837927dee4e46e8341954de89",
-      "size": 6255
+      "sha256": "250b534214344ce83bd9ad19ff15f804b85b01c9b2b54843983a5311967c2615",
+      "size": 6908
     },
     {
       "path": "scripts/sync_rules.py",
-      "sha256": "8ba67db7ee4db1a62fc14409ed9dce37b42968909a244abf4ece07613c87e2d3",
-      "size": 9731
+      "sha256": "ebf3a2b0f61741a32297f941a030f9e12fa53378e80b7254a340a75677774936",
+      "size": 9575
     },
     {
       "path": "scripts/ppt_format_check.py",
