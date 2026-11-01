@@ -44,12 +44,18 @@ def validate(check_manifest=True):
         result = run("ppt_format_check.py", out, "--brief")
         if "合计 0 处待修" not in result:
             raise ValueError(result)
-        # Verify valid role sizes survive and ambiguous values are not guessed.
+        # 层级内原样保留；非层级吸附到最近层级（等距取小）；超范围不猜
         sys.path.insert(0, str(ROOT / "scripts"))
         import apply_format
-        for size in [6.5, 9, 10, 14, 16, 18, 24, 28, 38.5]:
-            assert apply_format.map_size(size) == (size, False)
-        assert apply_format.map_size(15) == (None, False)
+        for size in apply_format.SZ_LEVELS:
+            assert apply_format.map_size(size) == (size, False, False), size
+        assert apply_format.map_size(15.5) == (16.0, True, True)     # 吸附·放大
+        assert apply_format.map_size(10.5) == (10.0, False, True)    # 吸附·缩小
+        assert apply_format.map_size(15) == (14.0, False, True)      # 等距取小
+        assert apply_format.map_size(44) == (38.5, False, True)      # 超大并入最大层级
+        assert apply_format.map_size(15.5, snap=False) == (None, False, False)
+        assert apply_format.map_size(3) == (None, False, False)      # 低于 5 pt 不猜
+        assert apply_format.map_size(72) == (None, False, False)     # 高于 60 pt 不猜
     if check_manifest:
         manifest = json.loads((ROOT / "manifest.json").read_text())
         for entry in manifest["files"]:
