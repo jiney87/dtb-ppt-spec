@@ -1,6 +1,9 @@
 # dtb-ppt-spec
 
-《DTB项目专项汇报》PPT 格式规范的**唯一真源**。
+PPT 输出规范与**默认模板**的**唯一真源**。
+
+> **默认模板**：`assets/company-template.pptx`（即《公司模板.pptx》）。
+> 之后所有 PPT 输出都从它起稿，用户未特别指定模板时不需要再问。
 
 - 仓库：`jiney87/dtb-ppt-spec`（Private）
 - 当前版本：见 `manifest.json` 的 `version`
@@ -14,6 +17,8 @@ manifest.json                    版本清单（version / released_at / files[].
 bootstrap.sh                     新设备一行自举安装（不需要项目目录）
 install.sh                       从本地副本安装（项目 iCloud 已同步时用）
 publish_rules.py                 发布工具：重算 manifest + 推 GitHub
+assets/
+  company-template.pptx          默认模板本体（5.8MB，二进制，受 sha256 管理）
 skill/
   SKILL.md                       技能定义（含「强制首步：核对规则版本」）
 references/
@@ -21,11 +26,12 @@ references/
   changelog.md                   版本变更记录
 scripts/
   sync_rules.py                  版本同步器（--check / --update / --status）
+  new_deck.py                    从默认模板生成新稿骨架
   ppt_format_check.py            合规自检（只读）
   apply_format.py                格式调整（默认干跑）
 ```
 
-`manifest.json` 里 `files[]` 只登记**运行时文件**（`skill/`、`references/`、`scripts/`）；
+`manifest.json` 里 `files[]` 只登记**运行时文件**（`skill/`、`references/`、`scripts/`、`assets/`）；
 `README.md`、`bootstrap.sh`、`install.sh`、`publish_rules.py` 属于仓库自身工具，不进清单。
 条目中的 `dest` 表示客户端落点：`skill/SKILL.md` → 本地根目录 `SKILL.md`。
 
@@ -95,8 +101,9 @@ python3 "$SK/scripts/sync_rules.py" --status    # 本地版本、文件指纹、
 Token 来源优先级：`GITHUB_TOKEN`、`GH_TOKEN`、`DTB_SPEC_TOKEN` 环境变量 →
 `~/.workbuddy/.secrets/github_token` → `~/.workbuddy/.github_token`。
 
-私有仓库只能走 `api.github.com`（本机 `raw.githubusercontent.com` 被拦），同步器一律用
-`/contents/` 接口取 base64 内容。
+私有仓库只能走 `api.github.com`（本机 `raw.githubusercontent.com` 被拦）。同步器取文件时：
+`/contents/` 正常返回 base64；**超过 1MB 的文件该接口不返回 content**，自动回退到
+`/git/blobs/{sha}` 取原文——模板（5.8MB）就走这条路径。
 
 ## 注意
 
