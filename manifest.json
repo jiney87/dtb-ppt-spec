@@ -1,0 +1,35 @@
+{
+  "spec_id": "dtb-ppt-spec",
+  "version": "1.0.0",
+  "released_at": "2026-11-01",
+  "channel": "stable",
+  "notes": "首版：基于 DTB项目专项汇报V1.8 全量实测沉淀，三档字号 28/16/12",
+  "files": [
+    {
+      "path": "skill/SKILL.md",
+      "sha256": "68178031b99ac4bed7e058f894db130c91bc5a96145c4435786ac80fa1519754",
+      "size": 6776,
+      "dest": "SKILL.md"
+    },
+    {
+      "path": "references/ppt-format-spec.md",
+      "sha256": "4511ef3963cddb124e5d2eceb4b397ac839fb9954bbd808a9fd70ac386d45347",
+      "size": 22133
+    },
+    {
+      "path": "references/changelog.md",
+      "sha256": "6606944a07268a68aa18b5d8a779121c4168daa77c00ca5ae2a12d9425582047",
+      "size": 1878
+    },
+    {
+      "path": "scripts/ppt_format_check.py",
+      "sha256": "e940d95434d41e2b710d1d11349d3f04343b6dba04326876e2a61c2802fd7599",
+      "size": 6751
+    },
+    {
+      "path": "scripts/apply_format.py",
+      "sha256": "231f46cfdd43aeab282bfe2363d89c593144c6ac9f17622ebcfa75519898efbb",
+      "size": 14029
+    }
+  ]
+}
