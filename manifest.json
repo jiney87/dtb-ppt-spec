@@ -1,9 +1,9 @@
 {
   "spec_id": "dtb-ppt-spec",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "released_at": "2026-11-01",
   "channel": "stable",
-  "notes": "首版：基于 DTB项目专项汇报V1.8 全量实测沉淀，三档字号 28/16/12",
+  "notes": "发布通路验证：GitHub 私有仓库托管与多设备同步链路确认",
   "files": [
     {
       "path": "skill/SKILL.md",
@@ -18,8 +18,8 @@
     },
     {
       "path": "references/changelog.md",
-      "sha256": "6606944a07268a68aa18b5d8a779121c4168daa77c00ca5ae2a12d9425582047",
-      "size": 1878
+      "sha256": "12a864a39653fca72e54e7171fa1c751e6baa36706ec8b1e95595a86703287ee",
+      "size": 2382
     },
     {
       "path": "scripts/ppt_format_check.py",
