@@ -1,6 +1,6 @@
 # dtb-ppt-spec
 
-PPT 输出规范与**默认模板**的**唯一真源**。
+PPT 默认伊利模板、咨询式组件规范与输出规则的**唯一真源**。
 
 > **默认模板**：`assets/company-template.pptx`（即《公司模板.pptx》）。
 > 之后所有 PPT 输出都从它起稿，用户未特别指定模板时不需要再问。
@@ -110,3 +110,13 @@ Token 来源优先级：`GITHUB_TOKEN`、`GH_TOKEN`、`DTB_SPEC_TOKEN` 环境变
 - 规则改动**只能**在仓库改，不要直接改某台设备上的缓存文件——会被下次同步覆盖。
 - `scripts/apply_format.py` 默认干跑，`--apply` 才写文件，且永远输出到新文件。
 - 规范以「先实测、后裁决」为原则：每条规则都要能对应到基准文件的实测数据。
+
+
+## v2.0 核心变化
+
+- 默认模板仍为伊利 `assets/company-template.pptx`，未指定模板时强制调用。
+- 咨询式组件库与模板解耦，不再把咨询公司PPT当母版。
+- 去除原咨询公司品牌身份，只保留专业规范、组件结构和颜色功能逻辑。
+- 中文字体：微软雅黑；英文与数字：Verdana。
+- 字号采用咨询式层级，不再使用旧版 28/15/12 三档限制。
+- ChatGPT Library 组件资产：`/DTB/PPT组件库/consulting-components-sanitized.pptx`。
