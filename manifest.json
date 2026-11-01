@@ -1,40 +1,50 @@
 {
   "spec_id": "dtb-ppt-spec",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "released_at": "2026-11-01",
   "channel": "stable",
-  "notes": "修复 sync_rules.py 未纳入受管文件；新增 bootstrap.sh 自举安装",
+  "notes": "默认模板固定为公司模板.pptx；几何按模板原值重算；新增 new_deck.py 与模板资产",
   "files": [
     {
       "path": "skill/SKILL.md",
-      "sha256": "b6a233b92faa797a4efa0bfb4a9d6c0cdec7fe70ec514b8bc3f92b21376493ac",
-      "size": 7500,
+      "sha256": "3ef29af7deeb92797cf69ec0590c66c717d58d4e62d3f79923e6a648ef3fc514",
+      "size": 7917,
       "dest": "SKILL.md"
     },
     {
       "path": "references/ppt-format-spec.md",
-      "sha256": "4511ef3963cddb124e5d2eceb4b397ac839fb9954bbd808a9fd70ac386d45347",
-      "size": 22133
+      "sha256": "04188547f33085382d1e41ef7215a712479cea2b60eb9729b4d1325dc2782a8f",
+      "size": 26041
     },
     {
       "path": "references/changelog.md",
-      "sha256": "31df8b159e78be06d6a2a406b0c0302ec7d9433f66ac359c641d0d3f17de135c",
-      "size": 3021
+      "sha256": "20f17b89dbc8d1fd686e41335833df842d52c097cab30a6debdf0f6b22539eb9",
+      "size": 5411
     },
     {
       "path": "scripts/sync_rules.py",
-      "sha256": "36097b3c85bc31932be57841ee4ed670a24f9dcdd0c90e794f252b1826dc31b4",
-      "size": 7699
+      "sha256": "27a467b06c733315149fa6898778bd02dab8ac2bcb4f1ed447438ba7546dcac3",
+      "size": 8555
     },
     {
       "path": "scripts/ppt_format_check.py",
-      "sha256": "e940d95434d41e2b710d1d11349d3f04343b6dba04326876e2a61c2802fd7599",
-      "size": 6751
+      "sha256": "208cfbcc19e6837dc4e5932bb5f6791e90f17aa887794476b2c144c84f9d3456",
+      "size": 8576
     },
     {
       "path": "scripts/apply_format.py",
-      "sha256": "231f46cfdd43aeab282bfe2363d89c593144c6ac9f17622ebcfa75519898efbb",
-      "size": 14029
+      "sha256": "90bdf4aa89c8e3cc85c36df1ec2edd8d381b990c4095180f746c267107d01ad1",
+      "size": 14097
+    },
+    {
+      "path": "scripts/new_deck.py",
+      "sha256": "690d68d956defeffca5f698d091a99d878899a7472a42d4e4bcdd1e03ec427dd",
+      "size": 8873
+    },
+    {
+      "path": "assets/company-template.pptx",
+      "sha256": "6eec37d748a95993dfcedd79031bb3690a9457e7c0b31ee4a7c5375bafca7a6b",
+      "size": 6109011
     }
   ]
 }
