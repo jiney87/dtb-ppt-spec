@@ -1,14 +1,14 @@
 {
   "spec_id": "dtb-ppt-spec",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "released_at": "2026-11-01",
   "channel": "stable",
-  "notes": "发布通路验证：GitHub 私有仓库托管与多设备同步链路确认",
+  "notes": "修复 sync_rules.py 未纳入受管文件；新增 bootstrap.sh 自举安装",
   "files": [
     {
       "path": "skill/SKILL.md",
-      "sha256": "68178031b99ac4bed7e058f894db130c91bc5a96145c4435786ac80fa1519754",
-      "size": 6776,
+      "sha256": "b6a233b92faa797a4efa0bfb4a9d6c0cdec7fe70ec514b8bc3f92b21376493ac",
+      "size": 7500,
       "dest": "SKILL.md"
     },
     {
@@ -18,8 +18,13 @@
     },
     {
       "path": "references/changelog.md",
-      "sha256": "12a864a39653fca72e54e7171fa1c751e6baa36706ec8b1e95595a86703287ee",
-      "size": 2382
+      "sha256": "31df8b159e78be06d6a2a406b0c0302ec7d9433f66ac359c641d0d3f17de135c",
+      "size": 3021
+    },
+    {
+      "path": "scripts/sync_rules.py",
+      "sha256": "36097b3c85bc31932be57841ee4ed670a24f9dcdd0c90e794f252b1826dc31b4",
+      "size": 7699
     },
     {
       "path": "scripts/ppt_format_check.py",
