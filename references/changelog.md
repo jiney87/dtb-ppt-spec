@@ -2,6 +2,16 @@
 
 
 
+## v1.1.2 — 2026-11-01
+
+**同步器取文件改走 `Contents + Accept: raw`**（原走 `git/blobs` JSON base64）。
+
+- `git/blobs` 不认 `raw`，实际仍返回 base64 JSON：1.5MB 文件要传 2.0MB，且在本机慢网下反复截断。
+- 改用 `GET /contents/{path}` + `Accept: application/vnd.github.raw`：直接拿裸字节，
+  **少 25% 流量、少一次元数据请求**；实测 1.5MB 模板 53s 完成、sha256 对齐。
+- 保留 JSON 退化分支（若服务端仍返回 JSON 则解 base64）与 3 次重试、sha 强校验。
+- 实测记录：首次尝试仍可能因网络闪断失败一次，第 2 次成功（全流程 134s）。
+
 ## v1.1.1 — 2026-11-01
 
 **模板瘦身（不改版式、不改品牌元素）**：`assets/company-template.pptx` 6.11 MB → **1.50 MB**。
