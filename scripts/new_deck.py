@@ -9,7 +9,7 @@
   python3 new_deck.py 输出.pptx --no-toc --no-thanks
 
 产出结构：封面 → 目录 →（章节页 + N 张正文页）× 章节数 → 结语页
-所有文字默认套用规范：微软雅黑、标题 28pt 加粗 #0084D5、正文 12pt、页码 12pt #7F7F7F。
+所有文字默认套用规范：中文微软雅黑、英文/数字 Verdana；咨询式字号层级；伊利品牌色。
 
 原则：**只复制模板，不新建空白演示文稿**；版式只用模板自带的 6 个。
 """
@@ -27,7 +27,7 @@ from pptx.util import Pt
 A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
 R = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
 
-FONT = "微软雅黑"
+EA_FONT = "微软雅黑"\nLATIN_FONT = "Verdana"
 BLUE = RGBColor(0x00, 0x84, 0xD5)
 BLACK = RGBColor(0x00, 0x00, 0x00)
 GRAY = RGBColor(0x7F, 0x7F, 0x7F)
@@ -46,9 +46,9 @@ def order_rpr(rPr):
         rPr.append(c)
 
 
-def set_font(run, size=None, bold=None, color=None, font=FONT):
+def set_font(run, size=None, bold=None, color=None, ea_font=EA_FONT, latin_font=LATIN_FONT):
     f = run.font
-    f.name = font
+    f.name = ea_font
     if size is not None:
         f.size = Pt(size)
     if bold is not None:
@@ -59,15 +59,15 @@ def set_font(run, size=None, bold=None, color=None, font=FONT):
     latin = rPr.find(A + "latin")
     if latin is None:
         latin = etree.SubElement(rPr, A + "latin")
-    latin.set("typeface", font)
+    latin.set("typeface", latin_font)
     ea = rPr.find(A + "ea")
     if ea is None:
         ea = etree.SubElement(rPr, A + "ea")
-    ea.set("typeface", font)
+    ea.set("typeface", ea_font)
     order_rpr(rPr)
 
 
-def write(tf, lines, size=12, bold=False, color=BLACK, align=PP_ALIGN.LEFT, space_after=6):
+def write(tf, lines, size=14, bold=False, color=BLACK, align=PP_ALIGN.LEFT, space_after=6):
     """清空并写入若干段落"""
     tf.clear()
     tf.word_wrap = True
@@ -84,20 +84,20 @@ def write(tf, lines, size=12, bold=False, color=BLACK, align=PP_ALIGN.LEFT, spac
 
 
 def style_slide_number(sp_el):
-    """把版式带来的页码字段统一成 微软雅黑 12pt #7F7F7F"""
+    """把版式带来的页码字段统一成 中文微软雅黑 / 英文数字Verdana，6.5pt #7F7F7F"""
     for fld in sp_el.iter(A + "fld"):
         rPr = fld.find(A + "rPr")
         if rPr is None:
             rPr = etree.Element(A + "rPr")
             fld.insert(0, rPr)
-        rPr.set("sz", "1200")
+        rPr.set("sz", "650")
         rPr.set("b", "0")
         for c in list(rPr):
             rPr.remove(c)
         sf = etree.SubElement(rPr, A + "solidFill")
         etree.SubElement(sf, A + "srgbClr").set("val", "7F7F7F")
-        etree.SubElement(rPr, A + "latin").set("typeface", FONT)
-        etree.SubElement(rPr, A + "ea").set("typeface", FONT)
+        etree.SubElement(rPr, A + "latin").set("typeface", LATIN_FONT)
+        etree.SubElement(rPr, A + "ea").set("typeface", EA_FONT)
         order_rpr(rPr)
 
 
@@ -172,11 +172,11 @@ def main():
     ph = [p for p in placeholders(s) if str(p.placeholder_format.type).startswith("BODY")]
     ph.sort(key=lambda p: (p.width or 0), reverse=True)   # 宽的是主标题
     if ph:
-        write(ph[0].text_frame, o.title.split("\\n"), 48, True, BLUE, space_after=0)
+        write(ph[0].text_frame, o.title.split("\\n"), 18, True, BLUE, space_after=0)
     if len(ph) > 1 and o.subtitle:
-        write(ph[1].text_frame, o.subtitle, 15, True, BLACK, space_after=0)
+        write(ph[1].text_frame, o.subtitle, 16, True, BLACK, space_after=0)
     if len(ph) > 2 and o.date:
-        write(ph[2].text_frame, o.date, 12, False, GRAY, space_after=0)
+        write(ph[2].text_frame, o.date, 10, False, GRAY, space_after=0)
     pages.append("封面")
 
     sections = [x.strip() for x in o.sections.split("|") if x.strip()]
@@ -184,7 +184,7 @@ def main():
     # 2) 目录
     if not o.no_toc:
         s = prs.slides.add_slide(L["正文页1"])
-        write(title_of(s).text_frame, "目录", 28, True, BLUE, space_after=0)
+        write(title_of(s).text_frame, "目录", 24, True, BLUE, space_after=0)
         items = sections or ["第一部分"]
         b = body_of(s)
         if b is not None:
@@ -195,9 +195,9 @@ def main():
                 p_ = tf.paragraphs[0] if i == 1 else tf.add_paragraph()
                 p_.space_after = Pt(18)
                 r1 = p_.add_run(); r1.text = f"{i:02d}"
-                set_font(r1, 15, True, BLUE)
+                set_font(r1, 14, True, BLUE)
                 r2 = p_.add_run(); r2.text = "    " + sec
-                set_font(r2, 15, False, BLACK)
+                set_font(r2, 14, False, BLACK)
         add_page_number(s, L["正文页1"])
         pages.append("目录")
 
@@ -206,18 +206,18 @@ def main():
         s = prs.slides.add_slide(L["间隔页"])
         t = title_of(s)
         if t is not None:
-            write(t.text_frame, sec, 32, True, BLUE, align=PP_ALIGN.CENTER, space_after=0)
+            write(t.text_frame, sec, 38.5, True, BLUE, align=PP_ALIGN.CENTER, space_after=0)
         add_page_number(s, L["间隔页"])
         pages.append(f"间隔页·{sec}")
         for _ in range(max(1, o.body)):
             s = prs.slides.add_slide(L["正文页1"])
-            write(title_of(s).text_frame, "【页标题】写结论，≤26字", 28, True, BLUE, space_after=0)
+            write(title_of(s).text_frame, "【页标题】写结论，≤26字", 24, True, BLUE, space_after=0)
             add_page_number(s, L["正文页1"])
             pages.append("正文页")
 
     if not sections:
         s = prs.slides.add_slide(L["正文页1"])
-        write(title_of(s).text_frame, "【页标题】写结论，≤26字", 28, True, BLUE, space_after=0)
+        write(title_of(s).text_frame, "【页标题】写结论，≤26字", 24, True, BLUE, space_after=0)
         add_page_number(s, L["正文页1"])
         pages.append("正文页")
 
