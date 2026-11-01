@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-按《DTB项目专项汇报 PPT 格式规范》批量调整 PPTX。
+按《PPT 输出规范 v1.1.0》（默认模板 公司模板.pptx）批量调整 PPTX。
 
 用法：
   python3 apply_format.py 源文件.pptx                  # 干跑，只输出将做的修改
@@ -24,14 +24,14 @@ from pptx.enum.shapes import MSO_SHAPE_TYPE, PP_PLACEHOLDER
 from pptx.oxml.ns import qn
 from lxml import etree
 
-# ─────────────────────────── 规范常量（与 spec 1.0.0 对齐）
+# ─────────────────────────── 规范常量（与 spec 1.1.0 对齐；几何取自公司模板原值）
 FONT = "微软雅黑"
-SZ_L, SZ_M, SZ_S = 28.0, 16.0, 12.0
+SZ_L, SZ_M, SZ_S = 28.0, 15.0, 12.0
 BLUE, DBLUE, LBLUE = "0084D5", "005E99", "DDEBF7"
 BLACK, GRAY, MGRAY, LGRAY = "000000", "7F7F7F", "BFBFBF", "F4F4F4"
-TITLE_BOX = (79.1, 50.1, 1126.2, 52.3)
-PAGENUM_BOX = (917.3, 667.8, 288.0, 38.3)
-LAYOUT_BODY = ("正文页1", "图片页")
+TITLE_BOX = (66.0, 50.0, 1030.0, 52.0)
+PAGENUM_BOX = (917.0, 668.0, 288.0, 38.0)
+LAYOUT_BODY = ("正文页1", "正文页2", "图片页")
 
 COLOR_MAP = {
     "FF0000": "C00000", "C9C8C7": "BFBFBF", "FEFFFE": "FFFFFF",
