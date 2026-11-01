@@ -1,25 +1,30 @@
 {
   "spec_id": "dtb-ppt-spec",
-  "version": "1.1.3",
+  "version": "2.0.0",
   "released_at": "2026-11-01",
   "channel": "stable",
-  "notes": "自检器修正：主题sysClr取lastClr；模板不符告警去重",
+  "notes": "模板与组件库解耦；默认伊利模板；咨询式组件系统；中文微软雅黑/英文数字Verdana；咨询式字号层级",
   "files": [
     {
       "path": "skill/SKILL.md",
-      "sha256": "3ef29af7deeb92797cf69ec0590c66c717d58d4e62d3f79923e6a648ef3fc514",
-      "size": 7917,
+      "sha256": "0f0214290268b3bf99cff0ae2c7650e6eddf0802bfd0772e1abcaa64d785e670",
+      "size": 9775,
       "dest": "SKILL.md"
     },
     {
       "path": "references/ppt-format-spec.md",
-      "sha256": "523e51b297500d1fe7593a09ed61260486f78093ae67fd449a2a50762dc3d3b6",
-      "size": 26041
+      "sha256": "97c0241d437b4fc4b07e10c9e2a03e4dee454f4779c1f174ecd0cb943b4ffc9e",
+      "size": 28572
+    },
+    {
+      "path": "references/component-library.md",
+      "sha256": "bf6abbb5845fdd4882dde96a17ee249653622f499de2b6639180472b29871915",
+      "size": 3241
     },
     {
       "path": "references/changelog.md",
-      "sha256": "938ce5a27caaf641e18f3173bbea0271e3fd8ad3c7fa23c8e2bf8807dc5e4654",
-      "size": 7326
+      "sha256": "2f445642d408f2047a3dbbc022219a7cec0abb48ab4ad619dbebead2f871c027",
+      "size": 8695
     },
     {
       "path": "scripts/sync_rules.py",
@@ -28,18 +33,18 @@
     },
     {
       "path": "scripts/ppt_format_check.py",
-      "sha256": "85ade955de5d517ee84db3752bacb77ae5489f444cccc00727443b098237586a",
-      "size": 8931
+      "sha256": "71216bdd863dedd30500797bf80cff41084faf3ee302f2712324305cd3a51969",
+      "size": 9089
     },
     {
       "path": "scripts/apply_format.py",
-      "sha256": "90bdf4aa89c8e3cc85c36df1ec2edd8d381b990c4095180f746c267107d01ad1",
-      "size": 14097
+      "sha256": "659220d8a9a00ab58d95749217039a8b0c1a7a496db69fabc7637d90564e60f0",
+      "size": 14173
     },
     {
       "path": "scripts/new_deck.py",
-      "sha256": "690d68d956defeffca5f698d091a99d878899a7472a42d4e4bcdd1e03ec427dd",
-      "size": 8873
+      "sha256": "928c271e7f8dff2a635e347f53bd52a04e7895715c8f94932191e9235d6b8654",
+      "size": 8989
     },
     {
       "path": "assets/company-template.pptx",
