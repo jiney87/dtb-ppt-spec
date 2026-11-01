@@ -18,7 +18,7 @@ bootstrap.sh                     新设备一行自举安装（不需要项目�
 install.sh                       从本地副本安装（项目 iCloud 已同步时用）
 publish_rules.py                 发布工具：重算 manifest + 推 GitHub
 assets/
-  company-template.pptx          默认模板本体（5.8MB，二进制，受 sha256 管理）
+  company-template.pptx          默认模板本体（1.5MB，二进制，受 sha256 管理）
 skill/
   SKILL.md                       技能定义（含「强制首步：核对规则版本」）
 references/
