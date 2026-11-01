@@ -1,9 +1,9 @@
 {
   "spec_id": "dtb-ppt-spec",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "released_at": "2026-11-01",
   "channel": "stable",
-  "notes": "修复咨询式字体字号迁移；增加发布静态检查、冒烟测试与完整性门禁",
+  "notes": "修复页码豁免误报与字号吸附失效；发布器改为按目录扫描，避免漏推新增文件",
   "files": [
     {
       "path": "skill/SKILL.md",
@@ -12,9 +12,9 @@
       "dest": "SKILL.md"
     },
     {
-      "path": "references/ppt-format-spec.md",
-      "sha256": "c089627bd525505f25d1702fdaad439b1fd91cd8638dac59fdf5ffcd610c4540",
-      "size": 24566
+      "path": "references/changelog.md",
+      "sha256": "fda562137704a1246e02dd6de4aea75d699ca154408218b8fe8c4e56cfdc0137",
+      "size": 11146
     },
     {
       "path": "references/component-library.md",
@@ -22,24 +22,14 @@
       "size": 3241
     },
     {
-      "path": "references/changelog.md",
-      "sha256": "b698ff988dffd53025c007c3e0c3714b50b383f2efe185f41045123e1a0efdf2",
-      "size": 9386
-    },
-    {
-      "path": "scripts/sync_rules.py",
-      "sha256": "ebf3a2b0f61741a32297f941a030f9e12fa53378e80b7254a340a75677774936",
-      "size": 9575
-    },
-    {
-      "path": "scripts/ppt_format_check.py",
-      "sha256": "a04f0f390f1d1ea23a293eb893ef1e41a7803053154ececf14bf5dc375b05549",
-      "size": 8949
+      "path": "references/ppt-format-spec.md",
+      "sha256": "1e43122676edc3b1e318474c7262635e3c8ce33129aa3181c46fbd2e00ef9964",
+      "size": 25372
     },
     {
       "path": "scripts/apply_format.py",
-      "sha256": "b5e9a4a24758ff5adbfece8e3d67ee62f6146abb388bc98ce07fd3ca452b1935",
-      "size": 14644
+      "sha256": "684d6e973caadaf1f01e2277ab96cf4339266f9cea459dc2ee46dd39fa140593",
+      "size": 15997
     },
     {
       "path": "scripts/new_deck.py",
@@ -47,14 +37,24 @@
       "size": 8988
     },
     {
-      "path": "assets/company-template.pptx",
-      "sha256": "73369b887cf190f8c6a140fa6dbe243dcb6f562fd2ca9a06be803b5039f2132f",
-      "size": 1498193
+      "path": "scripts/ppt_format_check.py",
+      "sha256": "a04f0f390f1d1ea23a293eb893ef1e41a7803053154ececf14bf5dc375b05549",
+      "size": 8949
+    },
+    {
+      "path": "scripts/sync_rules.py",
+      "sha256": "ebf3a2b0f61741a32297f941a030f9e12fa53378e80b7254a340a75677774936",
+      "size": 9575
     },
     {
       "path": "scripts/validate_release.py",
-      "size": 2993,
-      "sha256": "636437be5073d7dbb99b125e4c8cd602867a2da415f2698241f704ede143b31c"
+      "sha256": "1f0844e903880042547517a2419ae512ca97c00baf65adbba6524316697d2740",
+      "size": 3565
+    },
+    {
+      "path": "assets/company-template.pptx",
+      "sha256": "73369b887cf190f8c6a140fa6dbe243dcb6f562fd2ca9a06be803b5039f2132f",
+      "size": 1498193
     }
   ]
 }
