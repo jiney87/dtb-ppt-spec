@@ -71,7 +71,10 @@ def theme_dk1(prs):
         root = etree.fromstring(part.blob)
         el = root.find(f".//{A}clrScheme/{A}dk1")
         ch = list(el)[0]
-        return (ch.get("val") or ch.get("lastClr") or "").upper()
+        # sysClr 的 val 是 systemColor 名（如 windowText），真实色值在 lastClr
+        if etree.QName(ch).localname == "sysClr":
+            return (ch.get("lastClr") or "").upper()
+        return (ch.get("val") or "").upper()
     except Exception:
         return None
 
@@ -91,6 +94,7 @@ def main(path, brief=False):
         issues["T0 模板不符"].append(f"主题 dk1={dk}，应为 #{THEME_DK1}（非公司模板）")
 
     titles, pagenums = [], Counter()
+    unknown = {}
 
     for idx, s in enumerate(prs.slides, start=1):
         has_num = False
@@ -98,7 +102,7 @@ def main(path, brief=False):
         allow = SIZES | SPECIAL_SZ.get(layout_name, set())
 
         if layout_name not in LAYOUTS_KNOWN:
-            issues["T0 模板不符"].append(f"p{idx} 版式「{layout_name}」不在公司模板内")
+            unknown[layout_name] = unknown.get(layout_name, 0) + 1
 
         for sh in s.shapes:
             if sh.is_placeholder and str(sh.placeholder_format.type).startswith("TITLE"):
@@ -178,6 +182,10 @@ def main(path, brief=False):
         elif layout_name not in LAYOUTS_OK:
             issues["W1 版式越界"].append(
                 f"p{idx} 使用版式「{layout_name}」，允许：{' / '.join(LAYOUTS_OK)}")
+
+    if unknown:
+        desc = "、".join(f"{k}×{v}页" for k, v in sorted(unknown.items(), key=lambda x: -x[1]))
+        issues["T0 模板不符"].append(f"版式名不在公司模板内：{desc}")
 
     print(f"文件：{path.split('/')[-1]}")
     print(f"页数 {len(prs.slides)}｜标题 {len(titles)}｜页码 {sum(pagenums.values())}｜"
