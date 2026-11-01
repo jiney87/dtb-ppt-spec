@@ -92,26 +92,42 @@ python3 "$SK/scripts/apply_format.py" <file.pptx> [--apply] [-o 目标.pptx] [--
 
 ## 4. 安装与凭据（多设备）
 
-规则仓库是**私有**的，读取需要 GitHub Token（只需 `Contents: Read` 权限）。
-
-每台新设备只需做一次：
+规则仓库是**私有**的，读取需要 GitHub Token（fine-grained 勾 `Contents: Read` 即可；
+classic 则勾 `repo`）。每台设备配一次 Token，之后全自动。
 
 ```bash
+# 1) 配 Token（仅首次；Token 不要贴进对话、不要提交到仓库）
 mkdir -p ~/.workbuddy/.secrets
-printf '%s' 'ghp_xxxxxxxx' > ~/.workbuddy/.secrets/github_token
+printf '%s' '你的token' > ~/.workbuddy/.secrets/github_token
 chmod 600 ~/.workbuddy/.secrets/github_token
-python3 "$SK/scripts/sync_rules.py" --check     # 应返回 latest
+
+# 2a) 本机有项目目录：在 工具/dtb-ppt-spec/ 下执行
+bash install.sh
+
+# 2b) 本机没有项目目录：一行从 GitHub 自举安装
+TOKEN=$(cat ~/.workbuddy/.secrets/github_token)
+curl -s -H "Authorization: Bearer $TOKEN" -H "Accept: application/vnd.github.raw" \
+  "https://api.github.com/repos/jiney87/dtb-ppt-spec/contents/bootstrap.sh?ref=main" | bash
+
+# 3) 校验（应返回 latest）
+python3 "$SK/scripts/sync_rules.py" --check
 ```
 
-也支持环境变量 `GITHUB_TOKEN` / `GH_TOKEN`。**Token 只存本机，不得写进仓库、不得贴进对话。**
+也支持环境变量 `GITHUB_TOKEN` / `GH_TOKEN`，优先级高于文件。
+**Token 只存本机，不得写进仓库、不得贴进对话。**
 
 ## 5. 更新规则（当用户要改规范时）
 
 规则改动走 GitHub 仓库，再让各设备同步，**不要直接改本地缓存文件**：
 
-1. 改本地仓库副本 `工具/dtb-ppt-spec/`（reference、scripts）
-2. 升 `manifest.json` 的 `version` 与 `released_at`，重算 `files[].sha256`
-3. 推送 GitHub；各设备下次调用时自动拿到
+1. 改本地仓库副本 `工具/dtb-ppt-spec/`（`references/`、`scripts/`、`skill/SKILL.md`）
+2. 更新 `references/changelog.md`
+3. 发布（自动重算 manifest 并推送，无需手改 sha256）：
+   ```bash
+   cd 工具/dtb-ppt-spec
+   python3 publish_rules.py --bump 1.1.0 --note "新增XX规则" --push
+   ```
+4. 各设备下次 `--check` 即返回 `outdated`，`--update` 自动追平
 
 版本号语义：修文字/补案例 → PATCH（1.0.0→1.0.1）；新增规则项或改阈值 → MINOR；
 不兼容重写（如三档改四档）→ MAJOR。
