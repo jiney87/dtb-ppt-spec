@@ -1,9 +1,9 @@
 {
   "spec_id": "dtb-ppt-spec",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "released_at": "2026-11-01",
   "channel": "stable",
-  "notes": "默认模板固定为公司模板.pptx；几何按模板原值重算；新增 new_deck.py 与模板资产",
+  "notes": "模板瘦身 6.11MB→1.50MB（仅重编码示例图）；下载器加固 raw+分块+重试",
   "files": [
     {
       "path": "skill/SKILL.md",
@@ -13,18 +13,18 @@
     },
     {
       "path": "references/ppt-format-spec.md",
-      "sha256": "04188547f33085382d1e41ef7215a712479cea2b60eb9729b4d1325dc2782a8f",
+      "sha256": "523e51b297500d1fe7593a09ed61260486f78093ae67fd449a2a50762dc3d3b6",
       "size": 26041
     },
     {
       "path": "references/changelog.md",
-      "sha256": "20f17b89dbc8d1fd686e41335833df842d52c097cab30a6debdf0f6b22539eb9",
-      "size": 5411
+      "sha256": "e3db5f6674a04082f20ee043c9a0a8e0897521f837927dee4e46e8341954de89",
+      "size": 6255
     },
     {
       "path": "scripts/sync_rules.py",
-      "sha256": "27a467b06c733315149fa6898778bd02dab8ac2bcb4f1ed447438ba7546dcac3",
-      "size": 8555
+      "sha256": "8ba67db7ee4db1a62fc14409ed9dce37b42968909a244abf4ece07613c87e2d3",
+      "size": 9731
     },
     {
       "path": "scripts/ppt_format_check.py",
@@ -43,8 +43,8 @@
     },
     {
       "path": "assets/company-template.pptx",
-      "sha256": "6eec37d748a95993dfcedd79031bb3690a9457e7c0b31ee4a7c5375bafca7a6b",
-      "size": 6109011
+      "sha256": "73369b887cf190f8c6a140fa6dbe243dcb6f562fd2ca9a06be803b5039f2132f",
+      "size": 1498193
     }
   ]
 }
