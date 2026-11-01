@@ -16,7 +16,7 @@ PPT 默认伊利模板、咨询式组件规范与输出规则的**唯一真源**
 manifest.json                    版本清单（version / released_at / files[].sha256 / dest）
 bootstrap.sh                     新设备一行自举安装（不需要项目目录）
 install.sh                       从本地副本安装（项目 iCloud 已同步时用）
-publish_rules.py                 发布工具：重算 manifest + 推 GitHub
+scripts/validate_release.py      发布门禁：静态检查、冒烟与 manifest 校验
 assets/
   company-template.pptx          默认模板本体（1.5MB，二进制，受 sha256 管理）
 skill/
@@ -45,22 +45,17 @@ scripts/
 
 ## 发布一次新版本
 
-```bash
-# 1) 改 references/ scripts/ skill/SKILL.md
-# 2) 更新 references/changelog.md
-# 3) 发布（自动重算 manifest 的 sha256 与 version，并推送到 GitHub）
-cd 工具/dtb-ppt-spec
-python3 publish_rules.py --bump 1.1.0 --note "新增XX规则" --push
-```
+当前稳定版本为 **2.0.1**。本版本修复 2.0.0 不完整迁移造成的脚本和规范冲突。
 
-推送顺序是「先内容文件、最后 manifest.json」，避免客户端在内容未落盘时读到新版本号。
+1. 修改仓库源文件并更新 changelog。
+2. 安装检查依赖：`python -m pip install python-pptx pyflakes`。
+3. 运行 `python scripts/validate_release.py --skip-manifest` 校验内容。
+4. 更新 manifest 版本、发布日期和每个运行文件的字节数、SHA-256；新增运行脚本须加入清单。
+5. 运行 `python scripts/validate_release.py`，全部通过后将内容与 manifest 一起提交并推送 main。
+6. 从远端读取新提交，重新验证文件指纹和脚本。使用 `python publish_rules.py` 自动校验后推送。Actions 配置见 `references/release-validation.yml.example`；当前凭据缺少 workflow 权限，尚未启用远端 CI。
 
-其他命令：
-
-```bash
-python3 publish_rules.py --check    # 只看仓库是否存在、远端版本
-python3 publish_rules.py --push     # 不改版本号，仅同步内容
-```
+Git 提交原子发布内容与清单。不要使用逐文件写入方式提前发布 manifest。
+检查器只能覆盖已实现的规则，不能替代视觉检查。改版器遇到不明字号角色会保留并报告人工确认。
 
 ## 新设备安装
 

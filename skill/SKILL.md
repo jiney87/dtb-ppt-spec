@@ -58,15 +58,15 @@ python3 "$SK/scripts/sync_rules.py" --check
 |---|---|
 | 画布 | 16:9，33.87 × 19.05 cm（1280 × 720 px 渲染坐标） |
 | 版心（内容区） | 左 55.0 / 上 135.0 / 宽 1151.0 / 高 520.0；右界 1206.0，下界 655.0 |
-| 页标题 | L66.0 / T50.0 / W1030.0 / H52.0，**28pt 加粗 #0084D5**，单行 ≤26 字 |
+| 页标题 | L66.0 / T50.0 / W1030.0 / H52.0，**24pt 加粗 #0084D5**，单行 ≤26 字 |
 | 说明 | 标题比内容区右移 11px，是为避让左上蓝竖条——**别为"对齐"挪占位符** |
-| 页码 | L917.0 / T668.0 / W288.0 / H38.0，右对齐，**12pt #7F7F7F**，封面与结语页不加 |
+| 页码 | L917.0 / T668.0 / W288.0 / H38.0，右对齐，**6.5pt #7F7F7F**，封面与结语页不加 |
 | 栏间距 | 24px；2 栏 563.5 / 3 栏 367.7 / 4 栏 269.8 / 6 栏 171.8 |
 | 字号 | **文件标题18 / 文件副标题16 / 封面信息10；章节标题38.5 / 章节副标题38.5；引述高亮28 / 引述内容24；页面标题24 / 页面副标题24；标题文字、正文、项目符号、图表文字14；图表标签、来源9；页脚6.5 pt** |
 | 字体 | **中文：微软雅黑；英文与数字：Verdana**。同一文本框混排时通过 OOXML 的 eastAsia / latin 字体分别映射 |
-| 说明 | 字号层级来自咨询式组件规范；伊利模板仅提供品牌母版与布局骨架，不再强制旧版 28/15/12 三档 |
+| 说明 | 字号层级来自咨询式组件规范；伊利模板仅提供品牌母版与布局骨架，按语义角色选择字号 |
 | 主色 | #0084D5 品牌蓝；#C00000 风险红；#7F7F7F 注释灰；#DDEBF7 浅蓝底 |
-| 表头 | #0084D5 底 + 白字 12pt 加粗，行高 36px；数据行 28px / 12pt / 无竖线 |
+| 表头 | #0084D5 底 + 白字 14pt 加粗，行高 36px；数据行 28px / 14pt / 无竖线 |
 | 版式 | 6 个：封面 / 间隔页 / 正文页1 / 正文页2 / 图片页 / 1_Section Header（结语页）；`自定义版式` 禁用 |
 | 禁用色 | #FF0000 #C9C8C7 #FEFFFE #4EA5FF #61BA46 #008BCE #0070C0 #00B0F0 #2F75B5 #B5C6EA |
 
@@ -127,11 +127,7 @@ python3 "$SK/scripts/sync_rules.py" --check    # 应返回 latest
 
 1. 改本地仓库副本 `工具/dtb-ppt-spec/`（`references/`、`scripts/`、`skill/SKILL.md`；换模板则替换 `assets/company-template.pptx`）
 2. 更新 `references/changelog.md`
-3. 发布（自动重算 manifest 与 sha256）：
-   ```bash
-   cd 工具/dtb-ppt-spec
-   python3 publish_rules.py --bump 1.1.0 --note "新增XX规则" --push
-   ```
+3. 发布前安装 python-pptx、pyflakes，执行 `python3 scripts/validate_release.py --skip-manifest`；更新 manifest 版本和所有运行文件的 size/sha256 后执行 `python3 scripts/validate_release.py`，通过后将内容与清单一起提交并推送（详见仓库 README）。
 4. 各设备下次 `--check` 返回 `outdated`，`--update` 自动追平（模板一并更新）
 
 版本号语义：修文字/补案例 → PATCH；新增规则项、改阈值、换模板 → MINOR；不兼容重写 → MAJOR。

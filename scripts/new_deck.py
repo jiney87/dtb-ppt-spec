@@ -27,7 +27,8 @@ from pptx.util import Pt
 A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
 R = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
 
-EA_FONT = "微软雅黑"\nLATIN_FONT = "Verdana"
+EA_FONT = "微软雅黑"
+LATIN_FONT = "Verdana"
 BLUE = RGBColor(0x00, 0x84, 0xD5)
 BLACK = RGBColor(0x00, 0x00, 0x00)
 GRAY = RGBColor(0x7F, 0x7F, 0x7F)

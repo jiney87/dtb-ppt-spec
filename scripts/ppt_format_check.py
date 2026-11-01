@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-PPT 规范自检工具（v2.0.0，基准模板 = 伊利公司模板 + 咨询式组件规范）
+PPT 规范自检工具（v2.0.1，基准模板 = 伊利公司模板 + 咨询式组件规范）
 
 用法：python3 ppt_format_check.py <file.pptx> [--brief]
 输出：逐条违规清单 + 统计摘要。只读，不修改源文件。
 
-v1.1 变更：网格改为模板占位符原值（标题 L66/T50、内容 55–1206 / 135–655）；
-三档字号 28/15/12；新增「模板不符」总检（画布 / 主题蓝 / 版式名）。
+v2.0.1：双字体映射与咨询式字号层级。
 """
 import sys
 from collections import Counter, defaultdict
@@ -18,10 +17,11 @@ from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
 
 # ---- 基准常量（全部取自 assets/company-template.pptx 原值）----
-FONT = "微软雅黑"
-SIZES = {28.0, 15.0, 12.0}                      # 三档
-SPECIAL_SZ = {"封面": {48.0}, "间隔页": {32.0}}   # 特例页模板原生值
-TITLE_SZ = 28.0
+EA_FONT = "微软雅黑"
+LATIN_FONT = "Verdana"
+SIZES = {6.5, 9.0, 10.0, 14.0, 16.0, 18.0, 24.0, 28.0, 38.5}
+SPECIAL_SZ = {}  # 内容文字统一按咨询式层级
+TITLE_SZ = 24.0
 TITLE_POS = (66.0, 50.0)                        # px，允许 ±4
 BODY_LAYOUTS = ("正文页1", "正文页2", "图片页")
 LAYOUTS_OK = ("封面", "间隔页", "正文页1", "正文页2", "图片页", "1_Section Header")

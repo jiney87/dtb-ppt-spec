@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-按《PPT 输出规范 v2.0.0》（默认模板 公司模板.pptx）批量调整 PPTX。
+按《PPT 输出规范 v2.0.1》（默认模板 公司模板.pptx）批量调整 PPTX。
 
 用法：
   python3 apply_format.py 源文件.pptx                  # 干跑，只输出将做的修改
@@ -14,7 +14,7 @@
 """
 import sys, os, argparse
 from copy import deepcopy
-from collections import Counter, defaultdict
+from collections import defaultdict
 
 from pptx import Presentation
 from pptx.util import Emu, Pt
@@ -24,9 +24,10 @@ from pptx.enum.shapes import MSO_SHAPE_TYPE, PP_PLACEHOLDER
 from pptx.oxml.ns import qn
 from lxml import etree
 
-# ─────────────────────────── 规范常量（与 spec 1.1.0 对齐；几何取自公司模板原值）
-FONT = "微软雅黑"
-SZ_TITLE, SZ_BODY, SZ_LABEL, SZ_FOOTER = 28.0, 15.0, 12.0
+# ─────────────────────────── 规范常量（与 spec 2.0.1 对齐；几何取自公司模板原值）
+EA_FONT = "微软雅黑"
+LATIN_FONT = "Verdana"
+SZ_TITLE, SZ_BODY, SZ_LABEL, SZ_FOOTER = 24.0, 14.0, 9.0, 6.5
 BLUE, DBLUE, LBLUE = "0084D5", "005E99", "DDEBF7"
 BLACK, GRAY, MGRAY, LGRAY = "000000", "7F7F7F", "BFBFBF", "F4F4F4"
 TITLE_BOX = (66.0, 50.0, 1030.0, 52.0)
@@ -48,14 +49,12 @@ def to_emu(px):
 
 
 def map_size(pt):
-    """字号 → 三档。返回 (新字号, 是否放大)"""
+    """保留合法层级；无法仅凭字号确定语义时留待人工处理。"""
     if pt is None:
         return None, False
-    if pt >= 24:
-        return SZ_L, pt < SZ_L
-    if pt >= 13:
-        return SZ_M, pt < SZ_M
-    return SZ_S, pt < SZ_S
+    if pt in {6.5, 9, 10, 14, 16, 18, 24, 28, 38.5}:
+        return pt, False
+    return None, False
 
 
 # ─────────────────────────── XML 工具
@@ -170,11 +169,17 @@ class Applier:
                 if "size" in self.opts.only:
                     cur = r.font.size.pt if r.font.size else None
                     new, grew = map_size(cur)
+                    if is_title:
+                        new = 38.5 if sh.part.slide.slide_layout.name == "间隔页" else SZ_TITLE
+                        grew = cur is not None and new > cur
                     if new is None:
-                        new = SZ_TITLE if is_title else SZ_BODY
-                    if cur != new:
+                        if is_title:
+                            new = 38.5 if sh.part.slide.slide_layout.name == "间隔页" else SZ_TITLE
+                        else:
+                            self.log["字号待确认"].append(f"p{page} {cur or '继承'}pt :: {r.text[:14]}")
+                    if new is not None and cur != new:
                         r.font.size = Pt(new)
-                        self.log["字号"].append(f"p{page} {cur or '继承'}→{int(new)}pt :: {r.text[:14]}")
+                        self.log["字号"].append(f"p{page} {cur or '继承'}→{new:g}pt :: {r.text[:14]}")
                         if grew:
                             self.up[page] += 1
 
@@ -289,7 +294,7 @@ class Applier:
         for p in tf.paragraphs:
             p.alignment = PP_ALIGN.RIGHT
             for r in p.runs:
-                r.font.size = Pt(SZ_BODY)
+                r.font.size = Pt(SZ_FOOTER)
                 r.font.bold = False
                 set_ea_font(r._r.get_or_add_rPr())
                 set_solid(r._r.get_or_add_rPr(), GRAY)
@@ -307,7 +312,7 @@ class Applier:
     def report(self):
         tot = sum(len(v) for v in self.log.values())
         print("=" * 62)
-        for k in ("字号", "字体", "颜色", "标题位置", "表格", "页码补齐", "页码未补"):
+        for k in ("字号", "字体", "颜色", "标题位置", "表格", "页码补齐", "页码未补", "字号待确认"):
             if k in self.log:
                 print(f"{k}：{len(self.log[k])} 处")
         print("=" * 62)

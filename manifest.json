@@ -1,20 +1,20 @@
 {
   "spec_id": "dtb-ppt-spec",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "released_at": "2026-11-01",
   "channel": "stable",
-  "notes": "模板与组件库解耦；默认伊利模板；咨询式组件系统；中文微软雅黑/英文数字Verdana；咨询式字号层级",
+  "notes": "修复咨询式字体字号迁移；增加发布静态检查、冒烟测试与完整性门禁",
   "files": [
     {
       "path": "skill/SKILL.md",
-      "sha256": "0f0214290268b3bf99cff0ae2c7650e6eddf0802bfd0772e1abcaa64d785e670",
-      "size": 9775,
+      "sha256": "35a4d58c02b3ce5e8150727ae8e0e39f5c944a3c165782fe86eda3cb4499c8f0",
+      "size": 9895,
       "dest": "SKILL.md"
     },
     {
       "path": "references/ppt-format-spec.md",
-      "sha256": "97c0241d437b4fc4b07e10c9e2a03e4dee454f4779c1f174ecd0cb943b4ffc9e",
-      "size": 28572
+      "sha256": "c089627bd525505f25d1702fdaad439b1fd91cd8638dac59fdf5ffcd610c4540",
+      "size": 24566
     },
     {
       "path": "references/component-library.md",
@@ -23,8 +23,8 @@
     },
     {
       "path": "references/changelog.md",
-      "sha256": "2f445642d408f2047a3dbbc022219a7cec0abb48ab4ad619dbebead2f871c027",
-      "size": 8695
+      "sha256": "bb4be92470ebbed9b61ff287e588346497d0005799bdc441af59809b544c27bc",
+      "size": 9386
     },
     {
       "path": "scripts/sync_rules.py",
@@ -33,23 +33,28 @@
     },
     {
       "path": "scripts/ppt_format_check.py",
-      "sha256": "71216bdd863dedd30500797bf80cff41084faf3ee302f2712324305cd3a51969",
-      "size": 9089
+      "sha256": "a04f0f390f1d1ea23a293eb893ef1e41a7803053154ececf14bf5dc375b05549",
+      "size": 8949
     },
     {
       "path": "scripts/apply_format.py",
-      "sha256": "659220d8a9a00ab58d95749217039a8b0c1a7a496db69fabc7637d90564e60f0",
-      "size": 14173
+      "sha256": "b5e9a4a24758ff5adbfece8e3d67ee62f6146abb388bc98ce07fd3ca452b1935",
+      "size": 14644
     },
     {
       "path": "scripts/new_deck.py",
-      "sha256": "928c271e7f8dff2a635e347f53bd52a04e7895715c8f94932191e9235d6b8654",
-      "size": 8989
+      "sha256": "1fcc8cdaccbff02b874a8529434208673de909edbf79c34d52a7186ec273425f",
+      "size": 8988
     },
     {
       "path": "assets/company-template.pptx",
       "sha256": "73369b887cf190f8c6a140fa6dbe243dcb6f562fd2ca9a06be803b5039f2132f",
       "size": 1498193
+    },
+    {
+      "path": "scripts/validate_release.py",
+      "size": 2993,
+      "sha256": "636437be5073d7dbb99b125e4c8cd602867a2da415f2698241f704ede143b31c"
     }
   ]
 }
