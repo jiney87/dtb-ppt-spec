@@ -1,9 +1,9 @@
 {
   "spec_id": "dtb-ppt-spec",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "released_at": "2026-11-01",
   "channel": "stable",
-  "notes": "同步器改走 Contents raw 接口：少25%流量、少一次请求、慢网更稳",
+  "notes": "自检器修正：主题sysClr取lastClr；模板不符告警去重",
   "files": [
     {
       "path": "skill/SKILL.md",
@@ -18,8 +18,8 @@
     },
     {
       "path": "references/changelog.md",
-      "sha256": "250b534214344ce83bd9ad19ff15f804b85b01c9b2b54843983a5311967c2615",
-      "size": 6908
+      "sha256": "938ce5a27caaf641e18f3173bbea0271e3fd8ad3c7fa23c8e2bf8807dc5e4654",
+      "size": 7326
     },
     {
       "path": "scripts/sync_rules.py",
@@ -28,8 +28,8 @@
     },
     {
       "path": "scripts/ppt_format_check.py",
-      "sha256": "208cfbcc19e6837dc4e5932bb5f6791e90f17aa887794476b2c144c84f9d3456",
-      "size": 8576
+      "sha256": "85ade955de5d517ee84db3752bacb77ae5489f444cccc00727443b098237586a",
+      "size": 8931
     },
     {
       "path": "scripts/apply_format.py",
