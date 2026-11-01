@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-按《PPT 输出规范 v2.0.1》（默认模板 公司模板.pptx）批量调整 PPTX。
+按《PPT 输出规范 v2.0.2》（默认模板 公司模板.pptx）批量调整 PPTX。
 
 用法：
   python3 apply_format.py 源文件.pptx                  # 干跑，只输出将做的修改
@@ -8,9 +8,10 @@
   python3 apply_format.py 源文件.pptx --apply -o 目标.pptx
   可选项：--only font,size,color,title,table,pagenum
           --zebra   表格隔行填充 #F4F4F4
+          --no-snap 字号只改精确等于层级的值，不吸附（默认吸附到最近层级）
           --force   允许覆盖已存在的输出文件
 
-原则：不修改源文件；只做规范内的确定性替换；不确定的一律报告，不猜。
+原则：不修改源文件；只做规范内的确定性替换；超出 5–60 pt 的字号一律报告，不猜。
 """
 import sys, os, argparse
 from copy import deepcopy
@@ -24,7 +25,7 @@ from pptx.enum.shapes import MSO_SHAPE_TYPE, PP_PLACEHOLDER
 from pptx.oxml.ns import qn
 from lxml import etree
 
-# ─────────────────────────── 规范常量（与 spec 2.0.1 对齐；几何取自公司模板原值）
+# ─────────────────────────── 规范常量（与 spec 2.0.2 对齐；几何取自公司模板原值）
 EA_FONT = "微软雅黑"
 LATIN_FONT = "Verdana"
 SZ_TITLE, SZ_BODY, SZ_LABEL, SZ_FOOTER = 24.0, 14.0, 9.0, 6.5
@@ -33,6 +34,13 @@ BLACK, GRAY, MGRAY, LGRAY = "000000", "7F7F7F", "BFBFBF", "F4F4F4"
 TITLE_BOX = (66.0, 50.0, 1030.0, 52.0)
 PAGENUM_BOX = (917.0, 668.0, 288.0, 38.0)
 LAYOUT_BODY = ("正文页1", "正文页2", "图片页")
+# 不加页码的版式：封面；结语页用 1_Section Header（该版式本身无页码占位符）；
+# 自定义版式已禁用。此前只排除了「封面」，结语页每份文件都会报「页码未补 1 处」。
+PAGENUM_EXEMPT = ("封面", "1_Section Header", "自定义版式")
+
+# 咨询式层级（升序），字号吸附的唯一目标集合
+SZ_LEVELS = (6.5, 9.0, 10.0, 14.0, 16.0, 18.0, 24.0, 28.0, 38.5)
+SNAP_MIN, SNAP_MAX = 5.0, 60.0      # 超出此区间的字号不猜，交人工
 
 COLOR_MAP = {
     "FF0000": "C00000", "C9C8C7": "BFBFBF", "FEFFFE": "FFFFFF",
@@ -48,13 +56,22 @@ def to_emu(px):
     return Emu(int(round(px * PX)))
 
 
-def map_size(pt):
-    """保留合法层级；无法仅凭字号确定语义时留待人工处理。"""
+def map_size(pt, snap=True):
+    """把任意字号吸附到咨询式层级。
+
+    返回 (目标字号, 是否放大, 是否发生吸附)。
+    - 已在层级内：原样返回，absorb=False。
+    - 不在层级内且 snap=True：取最近层级的字号（等距时取小，避免撑破版面）。
+    - snap=False 或超出 5–60 pt：返回 None，交人工判断。
+    """
     if pt is None:
-        return None, False
-    if pt in {6.5, 9, 10, 14, 16, 18, 24, 28, 38.5}:
-        return pt, False
-    return None, False
+        return None, False, False
+    if pt in SZ_LEVELS:
+        return pt, False, False
+    if not snap or pt < SNAP_MIN or pt > SNAP_MAX:
+        return None, False, False
+    nearest = min(SZ_LEVELS, key=lambda x: (abs(x - pt), x))   # 等距取小
+    return nearest, nearest > pt, True
 
 
 # ─────────────────────────── XML 工具
@@ -154,7 +171,7 @@ class Applier:
                     self.fix_table(sh, i)
             if "title" in self.opts.only and is_body and title_shape is not None:
                 self.fix_title_box(title_shape, i)
-            if "pagenum" in self.opts.only and lay != "封面":
+            if "pagenum" in self.opts.only and lay not in PAGENUM_EXEMPT:
                 self.ensure_pagenum(slide, i)
 
     # --- 文本
@@ -168,18 +185,20 @@ class Applier:
                 # 字号
                 if "size" in self.opts.only:
                     cur = r.font.size.pt if r.font.size else None
-                    new, grew = map_size(cur)
+                    lay_name = sh.part.slide.slide_layout.name
                     if is_title:
-                        new = 38.5 if sh.part.slide.slide_layout.name == "间隔页" else SZ_TITLE
+                        new = 38.5 if lay_name == "间隔页" else SZ_TITLE
                         grew = cur is not None and new > cur
+                        absorbed = False
+                    else:
+                        new, grew, absorbed = map_size(cur, snap=self.opts.snap)
                     if new is None:
-                        if is_title:
-                            new = 38.5 if sh.part.slide.slide_layout.name == "间隔页" else SZ_TITLE
-                        else:
-                            self.log["字号待确认"].append(f"p{page} {cur or '继承'}pt :: {r.text[:14]}")
+                        self.log["字号待确认"].append(
+                            f"p{page} {cur or '继承'}pt :: {r.text[:14]}")
                     if new is not None and cur != new:
                         r.font.size = Pt(new)
-                        self.log["字号"].append(f"p{page} {cur or '继承'}→{new:g}pt :: {r.text[:14]}")
+                        key = "字号吸附" if absorbed else "字号"
+                        self.log[key].append(f"p{page} {cur or '继承'}→{new:g}pt :: {r.text[:14]}")
                         if grew:
                             self.up[page] += 1
 
@@ -312,7 +331,8 @@ class Applier:
     def report(self):
         tot = sum(len(v) for v in self.log.values())
         print("=" * 62)
-        for k in ("字号", "字体", "颜色", "标题位置", "表格", "页码补齐", "页码未补", "字号待确认"):
+        for k in ("字号", "字号吸附", "字体", "颜色", "标题位置", "表格",
+                  "页码补齐", "页码未补", "字号待确认"):
             if k in self.log:
                 print(f"{k}：{len(self.log[k])} 处")
         print("=" * 62)
@@ -338,6 +358,8 @@ def main():
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--only", default="font,size,color,title,table,pagenum")
     ap.add_argument("--zebra", action="store_true")
+    ap.add_argument("--no-snap", dest="snap", action="store_false",
+                    help="只改精确等于层级的字号；不在层级内的报告待确认，不吸附")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("-v", "--verbose", action="store_true")
     o = ap.parse_args()
