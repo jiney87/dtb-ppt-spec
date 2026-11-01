@@ -39,7 +39,7 @@ fi
 echo "→ 目标目录 $DST"
 mkdir -p "$DST/scripts"
 
-# --- 2. 先单独把同步器拉下来（它自己不在 manifest 的可校验范围里）---------
+# --- 2. 先单独把同步器拉下来（鸡生蛋：它得先存在才能校验其他文件）---------
 python3 - "$REPO" "$REF" "$API" "$DST" "$TOKEN" <<'PY'
 import sys, os, json, base64, urllib.request
 
