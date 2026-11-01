@@ -6,7 +6,7 @@
 - 补齐双字体常量；检查器与改版器统一咨询式层级，移除旧字号常量。
 - 改版器保留合法层级，按标题角色修正字号；不明角色保留原值并报告；页码统一 6.5 pt。
 - 清理规范和技能速查中的旧字号、单字体限制与已失效偏差统计。
-- 增加 validate_release.py、自动校验后推送的 publish_rules.py 和 GitHub Actions 配置样例：compile、pyflakes、旧规则扫描、生成/检查/改版冒烟、manifest 大小与 SHA-256 校验。
+- 增加 validate_release.py、自动校验后推送的 publish_rules.py 和 GitHub Actions 自动检查：compile、pyflakes、旧规则扫描、生成/检查/改版冒烟、manifest 大小与 SHA-256 校验。
 - 重新生成全部运行文件校验值，模板与品牌资产保持原版本。
 
 ## v2.0.0 — 2026-11-01

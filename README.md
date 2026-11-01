@@ -52,7 +52,7 @@ scripts/
 3. 运行 `python scripts/validate_release.py --skip-manifest` 校验内容。
 4. 更新 manifest 版本、发布日期和每个运行文件的字节数、SHA-256；新增运行脚本须加入清单。
 5. 运行 `python scripts/validate_release.py`，全部通过后将内容与 manifest 一起提交并推送 main。
-6. 从远端读取新提交，重新验证文件指纹和脚本。使用 `python publish_rules.py` 自动校验后推送。Actions 配置见 `references/release-validation.yml.example`；当前凭据缺少 workflow 权限，尚未启用远端 CI。
+6. 从远端读取新提交，重新验证文件指纹和脚本。使用 `python publish_rules.py` 自动校验后推送。GitHub Actions 配置见 `.github/workflows/validate.yml`，对 push、pull_request 和手动触发执行同一套检查。
 
 Git 提交原子发布内容与清单。不要使用逐文件写入方式提前发布 manifest。
 检查器只能覆盖已实现的规则，不能替代视觉检查。改版器遇到不明字号角色会保留并报告人工确认。
