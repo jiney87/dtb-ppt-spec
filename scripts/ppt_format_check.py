@@ -142,9 +142,10 @@ def main(path, brief=False):
                                 issues["F1 字号不在咨询式层级"].append(
                                     f"p{idx} {r.font.size.pt}pt :: {r.text[:20]}")
                         lat, ea = run_font(r)
-                        for f in (lat, ea):
-                            if f and f != FONT:
-                                issues["F2 字体不一致"].append(f"p{idx} {f} :: {r.text[:16]}")
+                        if lat and lat != LATIN_FONT:
+                            issues["F2 字体不一致"].append(f"p{idx} latin={lat} :: {r.text[:16]}")
+                        if ea and ea != EA_FONT:
+                            issues["F2 字体不一致"].append(f"p{idx} eastAsia={ea} :: {r.text[:16]}")
                         c = run_color(r)
                         if c and c.upper() in BANNED:
                             issues["C1 禁用色"].append(f"p{idx} #{c} :: {r.text[:16]}")
