@@ -60,11 +60,32 @@ def get(path):
         return json.loads(r.read().decode())
 
 
+def get_blob(sha):
+    """Git Blobs API：Contents API 对 >1MB 的文件不返回 content，必须走这里"""
+    url = f"{API}/repos/{REPO}/git/blobs/{sha}"
+    req = urllib.request.Request(url, headers={
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "dtb-ppt-spec-sync/1.0",
+        "X-GitHub-Api-Version": "2022-11-28",
+    })
+    t = token()
+    if t:
+        req.add_header("Authorization", f"Bearer {t}")
+    with urllib.request.urlopen(req, timeout=60) as r:
+        d = json.loads(r.read().decode())
+    return base64.b64decode(d["content"])
+
+
 def fetch_text(path):
+    """取名返回原始 bytes。模板等二进制文件由这里原样落盘。"""
     data = get(path)
     if isinstance(data, list):
         raise ValueError(f"{path} 是目录，不是文件")
-    raw = base64.b64decode(data["content"])
+    if data.get("content") and data.get("encoding", "base64") == "base64":
+        raw = base64.b64decode(data["content"])
+    else:
+        # >1MB：Contents API 返回 content="" / encoding="none"
+        raw = get_blob(data["sha"])
     return raw, data.get("sha")
 
 
