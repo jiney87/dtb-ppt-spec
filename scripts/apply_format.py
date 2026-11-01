@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-按《PPT 输出规范 v1.1.0》（默认模板 公司模板.pptx）批量调整 PPTX。
+按《PPT 输出规范 v2.0.0》（默认模板 公司模板.pptx）批量调整 PPTX。
 
 用法：
   python3 apply_format.py 源文件.pptx                  # 干跑，只输出将做的修改
@@ -26,7 +26,7 @@ from lxml import etree
 
 # ─────────────────────────── 规范常量（与 spec 1.1.0 对齐；几何取自公司模板原值）
 FONT = "微软雅黑"
-SZ_L, SZ_M, SZ_S = 28.0, 15.0, 12.0
+SZ_TITLE, SZ_BODY, SZ_LABEL, SZ_FOOTER = 28.0, 15.0, 12.0
 BLUE, DBLUE, LBLUE = "0084D5", "005E99", "DDEBF7"
 BLACK, GRAY, MGRAY, LGRAY = "000000", "7F7F7F", "BFBFBF", "F4F4F4"
 TITLE_BOX = (66.0, 50.0, 1030.0, 52.0)
@@ -62,13 +62,13 @@ def map_size(pt):
 RPR_TAIL = ("sym", "hlinkClick", "hlinkMouseOver", "rtl", "extLst")
 
 
-def set_ea_font(rPr, name=FONT):
+def set_ea_font(rPr, ea_name=EA_FONT, latin_name=LATIN_FONT):
     """在 rPr 上补齐 latin/ea/cs，且保持 schema 顺序（放在 fill 之后、hlinkClick 之前）"""
     for tag in ("latin", "ea", "cs"):
         el = rPr.find(qn("a:" + tag))
         if el is None:
             el = etree.SubElement(rPr, qn("a:" + tag))
-        el.set("typeface", name)
+        el.set("typeface", latin_name if tag == "latin" else ea_name)
         el.set("panose", "020B0503020204020204")
         el.set("charset", "-122")
     # 重排：把三个字体节点移到第一个尾部节点之前
@@ -171,7 +171,7 @@ class Applier:
                     cur = r.font.size.pt if r.font.size else None
                     new, grew = map_size(cur)
                     if new is None:
-                        new = SZ_L if is_title else SZ_S
+                        new = SZ_TITLE if is_title else SZ_BODY
                     if cur != new:
                         r.font.size = Pt(new)
                         self.log["字号"].append(f"p{page} {cur or '继承'}→{int(new)}pt :: {r.text[:14]}")
@@ -180,7 +180,7 @@ class Applier:
 
                 # 字体
                 if "font" in self.opts.only:
-                    set_ea_font(rPr, FONT)
+                    set_ea_font(rPr)
 
                 # 加粗：标题加粗，正文取消（表头另处理）
                 if is_title and r.font.bold is not True:
@@ -215,8 +215,8 @@ class Applier:
                     for p in cell.text_frame.paragraphs:
                         for r in p.runs:
                             if r.text.strip():
-                                r.font.size = Pt(SZ_S)
-                                set_ea_font(r._r.get_or_add_rPr(), FONT)
+                                r.font.size = Pt(SZ_BODY)
+                                set_ea_font(r._r.get_or_add_rPr())
             self.log["表格"].append(f"p{page} 1×{len(tbl.rows)} 单列表，仅统一字号")
             return
         for ri, row in enumerate(tbl.rows):
@@ -238,9 +238,9 @@ class Applier:
                     for r in p.runs:
                         if not r.text.strip():
                             continue
-                        r.font.size = Pt(SZ_S)
-                        r.font.name = FONT
-                        set_ea_font(r._r.get_or_add_rPr(), FONT)
+                        r.font.size = Pt(SZ_BODY)
+                        r.font.name = EA_FONT
+                        set_ea_font(r._r.get_or_add_rPr())
                         if ri == 0:
                             r.font.bold = True
                             set_solid(r._r.get_or_add_rPr(), "FFFFFF")
@@ -289,18 +289,18 @@ class Applier:
         for p in tf.paragraphs:
             p.alignment = PP_ALIGN.RIGHT
             for r in p.runs:
-                r.font.size = Pt(SZ_S)
+                r.font.size = Pt(SZ_BODY)
                 r.font.bold = False
-                set_ea_font(r._r.get_or_add_rPr(), FONT)
+                set_ea_font(r._r.get_or_add_rPr())
                 set_solid(r._r.get_or_add_rPr(), GRAY)
         # 占位符可能是 fld 而非 run
         for fld in tf._txBody.iter(qn("a:fld")):
             rPr = fld.find(qn("a:rPr"))
             if rPr is None:
                 rPr = etree.SubElement(fld, qn("a:rPr"))
-            rPr.set("sz", "1200")
+            rPr.set("sz", "650")
             rPr.set("b", "0")
-            set_ea_font(rPr, FONT)
+            set_ea_font(rPr)
             set_solid(rPr, GRAY)
 
     # --- 报告
