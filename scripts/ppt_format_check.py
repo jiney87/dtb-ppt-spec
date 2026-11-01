@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-PPT 规范自检工具（v1.1.0，基准模板 = 公司模板.pptx）
+PPT 规范自检工具（v2.0.0，基准模板 = 伊利公司模板 + 咨询式组件规范）
 
 用法：python3 ppt_format_check.py <file.pptx> [--brief]
 输出：逐条违规清单 + 统计摘要。只读，不修改源文件。
@@ -139,7 +139,7 @@ def main(path, brief=False):
                         if r.font.size:
                             stat["字号 " + str(r.font.size.pt)] += 1
                             if r.font.size.pt not in allow:
-                                issues["F1 字号超三档"].append(
+                                issues["F1 字号不在咨询式层级"].append(
                                     f"p{idx} {r.font.size.pt}pt :: {r.text[:20]}")
                         lat, ea = run_font(r)
                         for f in (lat, ea):
@@ -163,7 +163,7 @@ def main(path, brief=False):
                         for p in cell.text_frame.paragraphs:
                             for r in p.runs:
                                 if r.text.strip() and (
-                                        (r.font.size and r.font.size.pt != 12.0)
+                                        (r.font.size and r.font.size.pt != 14.0)
                                         or r.font.bold is not True):
                                     issues["B2 表头字重/字号"].append(
                                         f"p{idx} {r.font.size.pt if r.font.size else None}pt bold={r.font.bold}")
