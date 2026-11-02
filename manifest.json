@@ -13,8 +13,8 @@
     },
     {
       "path": "references/changelog.md",
-      "sha256": "7f34765f07c8f2b07cbe45f21990d8b43ad7db9e4c4e6c54c94e38566a16a5b5",
-      "size": 13421
+      "sha256": "b463c4b75ee8aff44cb7568fbe4d9d7c45401e9f4c52cfaced666e3155fe5ec5",
+      "size": 13792
     },
     {
       "path": "references/component-library.md",
@@ -23,8 +23,8 @@
     },
     {
       "path": "references/ppt-format-spec.md",
-      "sha256": "68ca311604f80e8fa42ffb540058c85eb704bd23f64df84f546755994ea922ad",
-      "size": 28253
+      "sha256": "a8e2b19f70ab9a0a7b9269bc6b3665f68ad552f128411f2f475343cb2883b657",
+      "size": 28705
     },
     {
       "path": "scripts/apply_format.py",
