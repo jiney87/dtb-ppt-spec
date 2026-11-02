@@ -1,20 +1,20 @@
 {
   "spec_id": "dtb-ppt-spec",
-  "version": "2.0.2",
-  "released_at": "2026-11-01",
+  "version": "2.1.0",
+  "released_at": "2026-11-02",
   "channel": "stable",
-  "notes": "修复页码豁免误报与字号吸附失效；发布器改为按目录扫描，避免漏推新增文件",
+  "notes": "修正间隔页（深底品牌蓝底图）字色：标题/页码/装饰线改白，新增 G6 与 §3.5 对比度规则、C2/C3 检查项",
   "files": [
     {
       "path": "skill/SKILL.md",
-      "sha256": "35a4d58c02b3ce5e8150727ae8e0e39f5c944a3c165782fe86eda3cb4499c8f0",
-      "size": 9895,
+      "sha256": "321daada8ef186615fb2a49b44e89a6d467a86c931a741ba7ae6d66cffb519ce",
+      "size": 10742,
       "dest": "SKILL.md"
     },
     {
       "path": "references/changelog.md",
-      "sha256": "fda562137704a1246e02dd6de4aea75d699ca154408218b8fe8c4e56cfdc0137",
-      "size": 11146
+      "sha256": "7f34765f07c8f2b07cbe45f21990d8b43ad7db9e4c4e6c54c94e38566a16a5b5",
+      "size": 13421
     },
     {
       "path": "references/component-library.md",
@@ -23,23 +23,23 @@
     },
     {
       "path": "references/ppt-format-spec.md",
-      "sha256": "1e43122676edc3b1e318474c7262635e3c8ce33129aa3181c46fbd2e00ef9964",
-      "size": 25372
+      "sha256": "68ca311604f80e8fa42ffb540058c85eb704bd23f64df84f546755994ea922ad",
+      "size": 28253
     },
     {
       "path": "scripts/apply_format.py",
-      "sha256": "684d6e973caadaf1f01e2277ab96cf4339266f9cea459dc2ee46dd39fa140593",
-      "size": 15997
+      "sha256": "9d90581a5f4d12c9a01ea9ae526ad15bba52695e2ef056c1f46bd482d143f9a6",
+      "size": 17838
     },
     {
       "path": "scripts/new_deck.py",
-      "sha256": "1fcc8cdaccbff02b874a8529434208673de909edbf79c34d52a7186ec273425f",
-      "size": 8988
+      "sha256": "91b8460eeab2888143a154632de5ff36e895430a866c5e7b66af5d7616a417e6",
+      "size": 9644
     },
     {
       "path": "scripts/ppt_format_check.py",
-      "sha256": "a04f0f390f1d1ea23a293eb893ef1e41a7803053154ececf14bf5dc375b05549",
-      "size": 8949
+      "sha256": "bc2e24af4862bc443a18affed261f7fbe72e84a11c693f6256371ae16bee5cc4",
+      "size": 12244
     },
     {
       "path": "scripts/sync_rules.py",
