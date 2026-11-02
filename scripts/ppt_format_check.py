@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-PPT 规范自检工具（v2.0.1，基准模板 = 伊利公司模板 + 咨询式组件规范）
+PPT 规范自检工具（v2.1.0，基准模板 = 伊利公司模板 + 咨询式组件规范）
 
 用法：python3 ppt_format_check.py <file.pptx> [--brief]
 输出：逐条违规清单 + 统计摘要。只读，不修改源文件。
 
-v2.0.1：双字体映射与咨询式字号层级。
+v2.1.0：新增「深底页字色对比」检查（C2/C3）——间隔页整页品牌蓝底，
+        品牌蓝字对比度仅 1.05、灰字 1.05，均不可读。
 """
 import sys
 from collections import Counter, defaultdict
@@ -15,6 +16,7 @@ from pptx import Presentation
 from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 
 A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
+P = "{http://schemas.openxmlformats.org/presentationml/2006/main}"
 
 # ---- 基准常量（全部取自 assets/company-template.pptx 原值）----
 EA_FONT = "微软雅黑"
@@ -34,6 +36,35 @@ PXW = 1280.0
 BANNED = {"FF0000", "C9C8C7", "FEFFFE", "4EA5FF", "61BA46",
           "008BCE", "0070C0", "00B0F0", "2F75B5", "B5C6EA"}
 HDR_FILL = "0084D5"
+
+# 深底版式 → 底图主色（规范 §3.5）。仅「间隔页」整页是品牌蓝底。
+# 该页文字、页码、装饰线一律必须是 #FFFFFF。
+DARK_LAYOUTS = {"间隔页": "048ACE"}
+MIN_RATIO_BIG, MIN_RATIO_SMALL = 3.0, 4.5   # WCAG：大字 / 小字
+
+
+def _lum(hexcolor):
+    """相对亮度（WCAG 2.1）"""
+    h = hexcolor.lstrip("#")
+    try:
+        r, g, b = (int(h[i:i + 2], 16) / 255.0 for i in (0, 2, 4))
+    except ValueError:
+        return None
+
+    def f(v):
+        return v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4
+
+    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
+
+
+def contrast(h1, h2):
+    """两色对比度；任一色值非法返回 None"""
+    a, b = _lum(h1), _lum(h2)
+    if a is None or b is None:
+        return None
+    hi, lo = max(a, b), min(a, b)
+    return (hi + 0.05) / (lo + 0.05)
+
 
 
 def px(v, scale):
@@ -170,6 +201,48 @@ def main(path, brief=False):
                                         f"p{idx} {r.font.size.pt if r.font.size else None}pt bold={r.font.bold}")
                 except Exception:
                     pass
+
+        # ---- 深底页：文字/页码必须白且对比度达标；装饰不得同品牌蓝（规范 §3.5）----
+        if layout_name in DARK_LAYOUTS:
+            base = DARK_LAYOUTS[layout_name]
+            for rPr in s.shapes._spTree.iter(A + "rPr"):
+                sf = rPr.find(A + "solidFill")
+                c = sf.find(A + "srgbClr") if sf is not None else None
+                if c is None:
+                    continue
+                val = (c.get("val") or "").upper()
+                if val == "FFFFFF":
+                    continue          # 白色是该底色下的最优解（#048ACE 上限 3.80），不再计算
+                ratio = contrast(val, base)
+                if ratio is None:
+                    continue
+                sz = rPr.get("sz")
+                sz = int(sz) / 100.0 if sz else None
+                bold = rPr.get("b") == "1"
+                # 字号继承时按大字宽松判（间隔页主文字为 38.5 pt 标题）
+                need = (MIN_RATIO_BIG if sz is None or (bold and sz >= 18) or sz >= 24
+                        else MIN_RATIO_SMALL)
+                if ratio < need:
+                    t = rPr.getparent().find(A + "t")
+                    label = (t.text or "")[:16] if t is not None else ""
+                    issues["C2 深底字色"].append(
+                        f"p{idx} #{val} 对比度{ratio:.2f}<{need:g}（底 #{base}）:: {label}")
+
+            for sp in s.shapes._spTree.iter(P + "sp"):
+                spPr = sp.find(P + "spPr")
+                if spPr is None:
+                    continue
+                fills = list(spPr.findall(A + "solidFill"))
+                ln = spPr.find(A + "ln")
+                if ln is not None:
+                    fills += list(ln.findall(A + "solidFill"))
+                for sf in fills:
+                    c = sf.find(A + "srgbClr")
+                    if c is not None and (c.get("val") or "").upper() == HDR_FILL:
+                        nm = sp.find(P + "nvSpPr/" + P + "cNvPr")
+                        name = nm.get("name") if nm is not None else "?"
+                        issues["C3 深底装饰同色"].append(
+                            f"p{idx} 形状「{name}」填充/描边为品牌蓝 #{HDR_FILL}，深底上不可见")
 
         if not has_num and layout_name not in NO_PAGENUM:
             issues["P1 缺页码"].append(f"p{idx}")
