@@ -32,6 +32,11 @@ LATIN_FONT = "Verdana"
 BLUE = RGBColor(0x00, 0x84, 0xD5)
 BLACK = RGBColor(0x00, 0x00, 0x00)
 GRAY = RGBColor(0x7F, 0x7F, 0x7F)
+WHITE = RGBColor(0xFF, 0xFF, 0xFF)
+
+# 深底版式 → 该页文字必须用白色（规范 §3.5）
+# 间隔页整页是品牌蓝底图（实测 #048ACE），品牌蓝字/灰字在上面都不可读
+DARK_LAYOUTS = {"间隔页": WHITE}
 
 RANK = {"ln": 1, "noFill": 2, "solidFill": 2, "gradFill": 2, "blipFill": 2, "pattFill": 2,
         "grpFill": 2, "effectLst": 3, "effectDag": 3, "highlight": 4, "uLnTx": 5, "uLn": 5,
@@ -84,8 +89,9 @@ def write(tf, lines, size=14, bold=False, color=BLACK, align=PP_ALIGN.LEFT, spac
     return tf
 
 
-def style_slide_number(sp_el):
-    """把版式带来的页码字段统一成 中文微软雅黑 / 英文数字Verdana，6.5pt #7F7F7F"""
+def style_slide_number(sp_el, color="7F7F7F"):
+    """把版式带来的页码字段统一成 中文微软雅黑 / 英文数字Verdana，6.5pt。
+    color 默认注释灰；深底版式（间隔页）传 FFFFFF，否则灰字在蓝底上看不见。"""
     for fld in sp_el.iter(A + "fld"):
         rPr = fld.find(A + "rPr")
         if rPr is None:
@@ -96,22 +102,24 @@ def style_slide_number(sp_el):
         for c in list(rPr):
             rPr.remove(c)
         sf = etree.SubElement(rPr, A + "solidFill")
-        etree.SubElement(sf, A + "srgbClr").set("val", "7F7F7F")
+        etree.SubElement(sf, A + "srgbClr").set("val", color)
         etree.SubElement(rPr, A + "latin").set("typeface", LATIN_FONT)
         etree.SubElement(rPr, A + "ea").set("typeface", EA_FONT)
         order_rpr(rPr)
 
 
-def add_page_number(slide, layout):
-    """模板 slide 默认不带页码占位符：从版式深拷贝一个"""
+def add_page_number(slide, layout, color="7F7F7F"):
+    """模板 slide 默认不带页码占位符：从版式深拷贝一个。"""
     for sh in slide.shapes:
         if sh.is_placeholder and "SLIDE_NUMBER" in str(sh.placeholder_format.type):
+            # 已自带页码占位符时也要统一字体/颜色，不能直接 return
+            style_slide_number(sh._element, color)
             return
     for sh in layout.shapes:
         if sh.is_placeholder and "SLIDE_NUMBER" in str(sh.placeholder_format.type):
             el = copy.deepcopy(sh._element)   # 深拷贝出来是游离节点，直接挂到 slide 上
             slide.shapes._spTree.append(el)
-            style_slide_number(el)
+            style_slide_number(el, color)
             return
 
 
@@ -207,8 +215,10 @@ def main():
         s = prs.slides.add_slide(L["间隔页"])
         t = title_of(s)
         if t is not None:
-            write(t.text_frame, sec, 38.5, True, BLUE, align=PP_ALIGN.CENTER, space_after=0)
-        add_page_number(s, L["间隔页"])
+            # 间隔页是整页品牌蓝底，标题必须白色（规范 §2.3 / §3.5）
+            write(t.text_frame, sec, 38.5, True, DARK_LAYOUTS["间隔页"],
+                  align=PP_ALIGN.CENTER, space_after=0)
+        add_page_number(s, L["间隔页"], "FFFFFF")
         pages.append(f"间隔页·{sec}")
         for _ in range(max(1, o.body)):
             s = prs.slides.add_slide(L["正文页1"])
