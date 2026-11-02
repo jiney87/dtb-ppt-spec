@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-按《PPT 输出规范 v2.0.2》（默认模板 公司模板.pptx）批量调整 PPTX。
+按《PPT 输出规范 v2.1.0》（默认模板 公司模板.pptx）批量调整 PPTX。
 
 用法：
   python3 apply_format.py 源文件.pptx                  # 干跑，只输出将做的修改
@@ -25,12 +25,17 @@ from pptx.enum.shapes import MSO_SHAPE_TYPE, PP_PLACEHOLDER
 from pptx.oxml.ns import qn
 from lxml import etree
 
-# ─────────────────────────── 规范常量（与 spec 2.0.2 对齐；几何取自公司模板原值）
+# ─────────────────────────── 规范常量（与 spec 2.1.0 对齐；几何取自公司模板原值）
 EA_FONT = "微软雅黑"
 LATIN_FONT = "Verdana"
 SZ_TITLE, SZ_BODY, SZ_LABEL, SZ_FOOTER = 24.0, 14.0, 9.0, 6.5
 BLUE, DBLUE, LBLUE = "0084D5", "005E99", "DDEBF7"
 BLACK, GRAY, MGRAY, LGRAY = "000000", "7F7F7F", "BFBFBF", "F4F4F4"
+WHITE = "FFFFFF"
+# 深底版式：整页品牌蓝底图，文字/页码一律改白（规范 §2.3 / §3.5）
+# 品牌蓝 #0084D5 落在 #048ACE 底上对比度仅 1.05；灰 #7F7F7F 仅 1.05，均不可读。
+DARK_LAYOUTS = {"间隔页"}
+
 TITLE_BOX = (66.0, 50.0, 1030.0, 52.0)
 PAGENUM_BOX = (917.0, 668.0, 288.0, 38.0)
 LAYOUT_BODY = ("正文页1", "正文页2", "图片页")
@@ -166,16 +171,18 @@ class Applier:
             for sh in walk(slide.shapes):
                 if sh.has_text_frame:
                     is_title = (title_id is not None and sh.shape_id == title_id)
-                    self.fix_text(sh, i, is_title, is_body)
+                    self.fix_text(sh, i, is_title, is_body, lay in DARK_LAYOUTS)
                 if sh.has_table and "table" in self.opts.only:
                     self.fix_table(sh, i)
             if "title" in self.opts.only and is_body and title_shape is not None:
                 self.fix_title_box(title_shape, i)
+            if lay in DARK_LAYOUTS and "color" in self.opts.only:
+                self.fix_dark_shapes(slide, i)
             if "pagenum" in self.opts.only and lay not in PAGENUM_EXEMPT:
                 self.ensure_pagenum(slide, i)
 
     # --- 文本
-    def fix_text(self, sh, page, is_title, is_body):
+    def fix_text(self, sh, page, is_title, is_body, dark=False):
         for p in sh.text_frame.paragraphs:
             for r in p.runs:
                 if not r.text.strip():
@@ -210,24 +217,47 @@ class Applier:
                 if is_title and r.font.bold is not True:
                     r.font.bold = True
 
-                # 颜色
+                # 颜色：深底版式一律白字 → 标题用品牌蓝 → 其余按禁用色映射
                 if "color" in self.opts.only:
                     cur = run_rgb(r)
-                    if cur and cur.upper() in COLOR_MAP:
-                        set_solid(rPr, COLOR_MAP[cur.upper()])
-                        self.log["颜色"].append(f"p{page} #{cur}→#{COLOR_MAP[cur.upper()]} :: {r.text[:14]}")
-
-            # 标题统一品牌蓝
-            if is_title and "color" in self.opts.only:
-                for r in p.runs:
-                    if r.text.strip():
-                        set_solid(r._r.get_or_add_rPr(), BLUE)
+                    if dark:
+                        target = WHITE
+                    elif is_title:
+                        target = BLUE
+                    elif cur and cur.upper() in COLOR_MAP:
+                        target = COLOR_MAP[cur.upper()]
+                    else:
+                        target = None
+                    if target and (cur or "").upper() != target:
+                        set_solid(rPr, target)
+                        key = "深底改白" if dark else "颜色"
+                        self.log[key].append(f"p{page} #{cur or '继承'}→#{target} :: {r.text[:14]}")
 
     def fix_title_box(self, sh, page):
         l, t, w, h = TITLE_BOX
         if (sh.left, sh.top, sh.width, sh.height) != (to_emu(l), to_emu(t), to_emu(w), to_emu(h)):
             sh.left, sh.top, sh.width, sh.height = to_emu(l), to_emu(t), to_emu(w), to_emu(h)
             self.log["标题位置"].append(f"p{page} 归位至 L{l}/T{t}")
+
+    def fix_dark_shapes(self, slide, page):
+        """深底页上的品牌蓝形状/线条改白——蓝底上的蓝色装饰等于没有装饰（规范 §3.5）。
+        只改精确等于品牌蓝的填充/描边，不猜测同色系。"""
+        for sp in slide.shapes._spTree.iter(qn("p:sp")):
+            spPr = sp.find(qn("p:spPr"))
+            if spPr is None:
+                continue
+            sfs = list(spPr.findall(qn("a:solidFill")))
+            ln = spPr.find(qn("a:ln"))
+            if ln is not None:
+                sfs += list(ln.findall(qn("a:solidFill")))
+            for sf in sfs:
+                c = sf.find(qn("a:srgbClr"))
+                if c is not None and (c.get("val") or "").upper() == BLUE:
+                    c.set("val", WHITE)
+                    nm = sp.find(qn("p:nvSpPr") + "/" + qn("p:cNvPr"))
+                    self.log["深底改白"].append(
+                        f"p{page} 形状「{nm.get('name') if nm is not None else '?'}」"
+                        f"#{BLUE}→#{WHITE}")
 
     # --- 表格
     def fix_table(self, sh, page):
@@ -282,6 +312,8 @@ class Applier:
 
     # --- 页码
     def ensure_pagenum(self, slide, page):
+        # 深底版式的页码必须白色，灰 #7F7F7F 在品牌蓝底上对比度仅 1.05
+        num_color = WHITE if slide.slide_layout.name in DARK_LAYOUTS else GRAY
         target = None
         for sh in slide.placeholders:
             if sh.placeholder_format.type == PP_PLACEHOLDER.SLIDE_NUMBER:
@@ -316,7 +348,7 @@ class Applier:
                 r.font.size = Pt(SZ_FOOTER)
                 r.font.bold = False
                 set_ea_font(r._r.get_or_add_rPr())
-                set_solid(r._r.get_or_add_rPr(), GRAY)
+                set_solid(r._r.get_or_add_rPr(), num_color)
         # 占位符可能是 fld 而非 run
         for fld in tf._txBody.iter(qn("a:fld")):
             rPr = fld.find(qn("a:rPr"))
@@ -325,13 +357,13 @@ class Applier:
             rPr.set("sz", "650")
             rPr.set("b", "0")
             set_ea_font(rPr)
-            set_solid(rPr, GRAY)
+            set_solid(rPr, num_color)
 
     # --- 报告
     def report(self):
         tot = sum(len(v) for v in self.log.values())
         print("=" * 62)
-        for k in ("字号", "字号吸附", "字体", "颜色", "标题位置", "表格",
+        for k in ("字号", "字号吸附", "字体", "颜色", "深底改白", "标题位置", "表格",
                   "页码补齐", "页码未补", "字号待确认"):
             if k in self.log:
                 print(f"{k}：{len(self.log[k])} 处")
